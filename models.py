@@ -18,3 +18,12 @@ class Country(BaseModel):
     @classmethod
     def normalize_population(cls, value: str) -> str:
         return value.replace(",", "")
+
+
+class RegionStats(BaseModel):
+    region_name: str
+    total_population: int
+    largest_country_name: str
+    largest_country_population: int
+    smallest_country_name: str
+    smallest_country_population: int

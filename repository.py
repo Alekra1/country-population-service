@@ -1,7 +1,7 @@
 import asyncpg
 
 from config import Settings
-from models import Country
+from models import Country, RegionStats
 
 
 class CountryRepository:
@@ -31,6 +31,37 @@ class CountryRepository:
                         for country in countries
                     ],
                 )
+
+        finally:
+            await conn.close()
+
+    async def region_stats(self) -> list[RegionStats]:
+        conn = await asyncpg.connect(self.url)
+        try:
+            rows = await conn.fetch("""
+            SELECT
+                region,
+                SUM(population) AS total_population,
+                (array_agg(name ORDER BY population DESC))[1] AS largest_country,
+                MAX(population) AS largest_population,
+                (array_agg(name ORDER BY population ASC))[1] AS smallest_country,
+                MIN(population) AS smallest_population
+            FROM countries
+            GROUP BY region
+            ORDER BY region;
+            """)
+            regions_statistics = []
+            for row in rows:
+                region = RegionStats(
+                    region_name=row["region"],
+                    total_population=row["total_population"],
+                    largest_country_name=row["largest_country"],
+                    largest_country_population=row["largest_population"],
+                    smallest_country_name=row["smallest_country"],
+                    smallest_country_population=row["smallest_population"],
+                )
+                regions_statistics.append(region)
+            return regions_statistics
 
         finally:
             await conn.close()
