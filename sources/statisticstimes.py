@@ -1,9 +1,13 @@
+import logging
+
 import httpx
 from bs4 import BeautifulSoup
 from pydantic import ValidationError
 
 from models import Country
 from sources.base import DataSource
+
+logger = logging.getLogger(__name__)
 
 URL = "https://statisticstimes.com/demographics/countries-by-population.php"
 
@@ -24,11 +28,10 @@ class StatisticsTimesSource(DataSource):
 
         rows = table.find_all("tr")
 
-        failed_countries = []
         countries: list[Country] = []
         for row in rows:
             data = row.find_all("td")
-            if len(data) < 8:
+            if len(data) < 9:
                 continue
             name = data[0].get_text()
             if "World" in name:
@@ -38,6 +41,8 @@ class StatisticsTimesSource(DataSource):
             try:
                 country = Country(name=name, region=region, population=population)
                 countries.append(country)
-            except ValidationError:
-                failed_countries.append(name.strip())
+            except ValidationError as exc:
+                logger.warning("Skipping row %r: %s", name.strip(), exc)
+        if not countries:
+            raise RuntimeError("No countries parsed; page layout may have changed")
         return countries

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from config import Settings
 from repository import CountryRepository
@@ -25,4 +26,6 @@ class GetDataApp:
         await repo.replace_all(countries)
 
 
-asyncio.run(GetDataApp().run())
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(GetDataApp().run())

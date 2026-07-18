@@ -22,7 +22,7 @@ services:
       - DB_USER=user
       - DB_PASSWORD=password
       - DB_NAME=postgres
-      - DATA_SOURCE=wikipedia #wikipedia or statisticstimes
+      - DATA_SOURCE=${DATA_SOURCE:-wikipedia} #wikipedia or statisticstimes
     depends_on:
       db:
         condition: service_healthy

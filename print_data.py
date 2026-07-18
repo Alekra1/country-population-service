@@ -16,4 +16,5 @@ class PrintDataApp:
             print(f"Smallest Population: {region.smallest_country_population}")
 
 
-asyncio.run(PrintDataApp().run())
+if __name__ == "__main__":
+    asyncio.run(PrintDataApp().run())
